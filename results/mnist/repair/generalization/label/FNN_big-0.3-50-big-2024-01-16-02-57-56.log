@@ -1,0 +1,58 @@
+[2024-01-16 02:57:56,322][INFO] 
+===== FNN_big-0.3-50-big-2024-01-16-02-57-56 configuration =====
+  exp_fn: test_goal_test
+  seed: None
+  dom: deeppoly
+  start_abs_cnt: 500
+  max_abs_cnt: 1000
+  refine_top_k: 800
+  tiny_width: 0.001
+  lr: 0.001
+  batch_size: 50
+  min_epochs: 25
+  max_epochs: 45
+  use_scheduler: True
+  no_pts: False
+  no_abs: False
+  no_refine: False
+  quiet: False
+  debug: False
+  net: FNN_big
+  no_repair: False
+  repair_number: 50
+  repair_batchsize: 1
+  patch_size: big
+  label_repaired: True
+  repair_radius: 0.3
+  divided_repair: 1
+  accuracy_loss: <function MnistArgParser.setup_rest.<locals>.ce_loss at 0x7fadc0039e50>
+  sample_amount: 5000
+  reset_params: False
+  train_datasize: 10000
+  test_datasize: 10000
+  repair_batch_size: 50
+  scheduler_fn: <function ExpArgParser.setup_rest.<locals>.<lambda> at 0x7fadc0039dc0>
+===== end of FNN_big-0.3-50-big-2024-01-16-02-57-56 configuration =====
+
+[2024-01-16 02:57:56,323][INFO] ===== start repair ======
+[2024-01-16 02:57:56,323][INFO] For pgd attack net
+[2024-01-16 02:57:56,323][INFO] --test_label_repaired
+[2024-01-16 02:57:57,836][INFO] --big patch network: --- PatchNet ---
+Name: big patch network 9
+--- End of PatchNet ---
+[2024-01-16 02:57:59,151][INFO] --load the trainset and testset as testing set
+[2024-01-16 02:57:59,165][INFO] --evaluate the original net on testset
+[2024-01-16 02:57:59,167][INFO] --For testset, out of 10000 items, ratio 0.9718
+[2024-01-16 02:57:59,167][INFO] --evaluate the repaired net on testset and get the bitmap
+[2024-01-16 02:57:59,178][INFO] --For testset, out of 10000 items, ratio 0.9718
+[2024-01-16 02:57:59,539][INFO] --test the defense against autoattack
+[2024-01-16 02:57:59,774][INFO] correct2 29
+[2024-01-16 02:57:59,998][INFO] correct2 25
+[2024-01-16 02:58:00,219][INFO] correct2 29
+[2024-01-16 02:58:00,446][INFO] correct2 26
+[2024-01-16 02:58:00,669][INFO] correct2 29
+[2024-01-16 02:58:00,894][INFO] correct2 29
+[2024-01-16 02:58:01,121][INFO] correct2 26
+[2024-01-16 02:58:01,347][INFO] correct2 26
+[2024-01-16 02:58:01,570][INFO] correct2 27
+[2024-01-16 02:58:01,814][INFO] correct2 28

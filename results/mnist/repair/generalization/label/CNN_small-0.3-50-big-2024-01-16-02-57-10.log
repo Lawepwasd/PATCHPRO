@@ -1,0 +1,56 @@
+[2024-01-16 02:57:10,498][INFO] 
+===== CNN_small-0.3-50-big-2024-01-16-02-57-10 configuration =====
+  exp_fn: test_goal_test
+  seed: None
+  dom: deeppoly
+  start_abs_cnt: 500
+  max_abs_cnt: 1000
+  refine_top_k: 800
+  tiny_width: 0.001
+  lr: 0.001
+  batch_size: 50
+  min_epochs: 25
+  max_epochs: 45
+  use_scheduler: True
+  no_pts: False
+  no_abs: False
+  no_refine: False
+  quiet: False
+  debug: False
+  net: CNN_small
+  no_repair: False
+  repair_number: 50
+  repair_batchsize: 1
+  patch_size: big
+  label_repaired: True
+  repair_radius: 0.3
+  divided_repair: 1
+  accuracy_loss: <function MnistArgParser.setup_rest.<locals>.ce_loss at 0x7f90bc2d6e50>
+  sample_amount: 5000
+  reset_params: False
+  train_datasize: 10000
+  test_datasize: 10000
+  repair_batch_size: 50
+  scheduler_fn: <function ExpArgParser.setup_rest.<locals>.<lambda> at 0x7f90bc2d6dc0>
+===== end of CNN_small-0.3-50-big-2024-01-16-02-57-10 configuration =====
+
+[2024-01-16 02:57:10,499][INFO] ===== start repair ======
+[2024-01-16 02:57:10,499][INFO] For pgd attack net
+[2024-01-16 02:57:10,499][INFO] --test_label_repaired
+[2024-01-16 02:57:11,915][INFO] --big patch network: --- PatchNet ---
+Name: big patch network 9
+--- End of PatchNet ---
+[2024-01-16 02:57:13,695][INFO] --load the trainset and testset as testing set
+[2024-01-16 02:57:13,710][INFO] --evaluate the original net on testset
+[2024-01-16 02:57:13,712][INFO] --For testset, out of 10000 items, ratio 0.9827
+[2024-01-16 02:57:13,712][INFO] --evaluate the repaired net on testset and get the bitmap
+[2024-01-16 02:57:13,723][INFO] --For testset, out of 10000 items, ratio 0.9827
+[2024-01-16 02:57:14,076][INFO] --test the defense against autoattack
+[2024-01-16 02:57:14,295][INFO] correct2 31
+[2024-01-16 02:57:14,495][INFO] correct2 31
+[2024-01-16 02:57:14,693][INFO] correct2 32
+[2024-01-16 02:57:14,898][INFO] correct2 31
+[2024-01-16 02:57:15,115][INFO] correct2 32
+[2024-01-16 02:57:15,318][INFO] correct2 32
+[2024-01-16 02:57:15,525][INFO] correct2 31
+[2024-01-16 02:57:15,733][INFO] correct2 31

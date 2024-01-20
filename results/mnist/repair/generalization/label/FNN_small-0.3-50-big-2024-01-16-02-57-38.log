@@ -1,0 +1,57 @@
+[2024-01-16 02:57:38,024][INFO] 
+===== FNN_small-0.3-50-big-2024-01-16-02-57-38 configuration =====
+  exp_fn: test_goal_test
+  seed: None
+  dom: deeppoly
+  start_abs_cnt: 500
+  max_abs_cnt: 1000
+  refine_top_k: 800
+  tiny_width: 0.001
+  lr: 0.001
+  batch_size: 50
+  min_epochs: 25
+  max_epochs: 45
+  use_scheduler: True
+  no_pts: False
+  no_abs: False
+  no_refine: False
+  quiet: False
+  debug: False
+  net: FNN_small
+  no_repair: False
+  repair_number: 50
+  repair_batchsize: 1
+  patch_size: big
+  label_repaired: True
+  repair_radius: 0.3
+  divided_repair: 1
+  accuracy_loss: <function MnistArgParser.setup_rest.<locals>.ce_loss at 0x7f07a0675e50>
+  sample_amount: 5000
+  reset_params: False
+  train_datasize: 10000
+  test_datasize: 10000
+  repair_batch_size: 50
+  scheduler_fn: <function ExpArgParser.setup_rest.<locals>.<lambda> at 0x7f07a0675dc0>
+===== end of FNN_small-0.3-50-big-2024-01-16-02-57-38 configuration =====
+
+[2024-01-16 02:57:38,024][INFO] ===== start repair ======
+[2024-01-16 02:57:38,024][INFO] For pgd attack net
+[2024-01-16 02:57:38,024][INFO] --test_label_repaired
+[2024-01-16 02:57:39,516][INFO] --big patch network: --- PatchNet ---
+Name: big patch network 9
+--- End of PatchNet ---
+[2024-01-16 02:57:40,183][INFO] --load the trainset and testset as testing set
+[2024-01-16 02:57:40,197][INFO] --evaluate the original net on testset
+[2024-01-16 02:57:40,199][INFO] --For testset, out of 10000 items, ratio 0.9658
+[2024-01-16 02:57:40,199][INFO] --evaluate the repaired net on testset and get the bitmap
+[2024-01-16 02:57:40,209][INFO] --For testset, out of 10000 items, ratio 0.9658
+[2024-01-16 02:57:40,572][INFO] --test the defense against autoattack
+[2024-01-16 02:57:40,808][INFO] correct2 9
+[2024-01-16 02:57:41,028][INFO] correct2 16
+[2024-01-16 02:57:41,245][INFO] correct2 13
+[2024-01-16 02:57:41,464][INFO] correct2 11
+[2024-01-16 02:57:41,677][INFO] correct2 11
+[2024-01-16 02:57:41,889][INFO] correct2 14
+[2024-01-16 02:57:42,100][INFO] correct2 10
+[2024-01-16 02:57:42,311][INFO] correct2 14
+[2024-01-16 02:57:42,525][INFO] correct2 21
