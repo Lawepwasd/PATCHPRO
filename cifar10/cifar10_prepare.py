@@ -700,7 +700,131 @@ from DiffAbs.DiffAbs import deeppoly
 from cifar10_utils import Cifar_feature_patch_model,CifarProp
 
 
+def compare_autoattack_big(net, 
+                            radius_bit, repair_number):
+    '''
+    use the length of pgd steps to compare the hardness of attacking two model respectively
+    the model1 is origin model, model2 is repaired model
+    '''
+    # load net
 
+    radius= radius_bit/255
+    
+    device = 'cuda:1' if torch.cuda.is_available() else 'cpu'
+    print(f'Using {device} device')
+    # print(f'Using {device} device')
+    # if net == 'vgg19':
+    #     model1 = VGG('VGG19').to(device)
+    #     state = torch.load(f"./model/cifar10/vgg19.pth")
+    #     model1.load_state_dict(state)
+    # elif net == 'resnet18':
+    #     model1 = resnet18(num_classes=10).to(device)
+    #     state = torch.load(f"./model/cifar10/resnet18.pth")
+    #     model1.load_state_dict(state)
+    # model1.to(device)
+    # model1.eval()
+
+
+    if net == 'vgg19':
+        frontier = VGG('VGG19').to(device)
+        frontier_state = torch.load(f"./model/cifar10/vgg19.pth")
+        frontier.load_state_dict(frontier_state)
+    elif net == 'resnet18':
+        frontier = Resnet_model(dom= deeppoly).to(device)
+        frontier_state = torch.load(f"./model/cifar10/resnet18.pth")
+        frontier.load_state_dict(frontier_state)
+    frontier.to(device)
+
+    frontier, rear  = frontier.split()
+
+    patch_lists = []
+    for i in range(repair_number):
+        # if patch_format == 'small':
+        patch_net = Cifar_feature_patch_model_big(dom=deeppoly, name = f'feature patch network {i}', input_dimension=512)
+        # elif patch_format == 'big':
+        #     patch_net = Cifar_feature_patch_model(dom=deeppoly,name = f'big patch network {i}')
+        patch_net.to(device)
+        patch_lists.append(patch_net)
+    rear =  Netsum(deeppoly, target_net = rear, patch_nets= patch_lists, device=device)
+
+    rear.load_state_dict(torch.load(f"./model/cifar10_big_format/Cifar-{net}-feature-repair_number{repair_number}-rapair_radius{radius_bit}.pt",map_location=device))
+    model2 = NetFeatureSumPatch(feature_sumnet=rear, feature_extractor=frontier)
+    torch.save(model2.state_dict(),f"./model/cifar10_big_format/Cifar-{net}-full-repair_number{repair_number}-rapair_radius{radius_bit}-feature_sumnet.pt")
+    model2.eval()
+
+    # model3 = adv_training(net,radius, data_num=repair_number, device=device, radius_bit=radius_bit)
+
+
+    # load data
+    datas,labels = torch.load(f'./data/cifar10/origin_data_{net}_{radius_bit}.pt',map_location=device)
+    # return
+    
+    datas = datas[:repair_number]
+    labels = labels[:repair_number]
+
+    # pgd
+    # pgd1 = PGD(model=model1, eps=radius, alpha=2/255, steps=50, random_start=True)
+    # pgd2 = PGD(model=model2, eps=radius, alpha=2/255, steps=50, random_start=True)
+    # pgd3 = PGD(model=model3, eps=radius, alpha=2/255, steps=50, random_start=True)
+    from torchattacks import AutoAttack
+
+
+    # attack
+    # ori_step = 0
+    # repair_step = 0
+    # pgd_step = 0
+
+    # get bitmap
+    from art.prop import AndProp
+    # from art.bisecter import Bisecter
+    repairlist = [(data[0],data[1]) for data in zip(datas, labels)]
+    repair_prop_list = CifarProp.all_props(deeppoly, DataList=repairlist, input_shape= datas.shape[1:], radius= radius)
+    # get the all props after join all l_0 ball feature property
+    # TODO squeeze the property list, which is the same as the number of label
+    all_props = AndProp(props=repair_prop_list)
+    # v = Bisecter(deeppoly, all_props)
+    in_lb, in_ub = all_props.lbub(device)
+    in_bitmap = all_props.bitmap(device)
+
+    # bitmap = get_bitmap(in_lb, in_ub, in_bitmap, datas, device)
+
+    data_loader = DataLoader(torch.utils.data.TensorDataset(datas,labels), batch_size=32)
+
+    p2 = 0
+
+
+    for images,labels in data_loader:
+        images = images.to(device)
+        labels = labels.to(device)
+
+        bitmap_batch = get_bitmap(in_lb, in_ub, in_bitmap, images, device)
+        model2.feature_sumnet.bitmap = bitmap_batch
+        at2 = AutoAttack(model2, norm='Linf', eps=radius, version='standard', verbose=False, 
+                         bitmap=bitmap_batch)
+        adv_images2 = at2(images, labels)
+        outs2 = model2(adv_images2)
+        predicted2 = torch.argmax(outs2, dim=1)
+        correct2 = torch.sum(predicted2 == labels).item()
+        p2 += correct2
+        print(f"big patch attack success {correct2}")
+        
+        # step1, ori_acc = pgd1.forward_sumsteps(image,label)
+        # step2, repair_acc = pgd2.forward_sumsteps(image,label, device=device, bitmap = [in_lb, in_ub, in_bitmap])
+        # step3, adt_acc = pgd3.forward_sumsteps(image,label)
+        # ori_step += step1
+        # repair_step += step2
+        # pgd_step += step3
+        # if ori_acc == 1:
+        #     p1 += 1
+        # if repair_acc == 1:
+        #     p2 += 1
+        # if adt_acc == 1:
+        #     p3 += 1
+            
+    
+    # print(f"ori_step {ori_step}, repair_step {repair_step}, pgd_step {pgd_step} \\ ori:{p1}, patch:{p2}, adv-train:{p3}")
+    with open(f'./results/cifar10/repair/autoattack/compare_autoattack_ac.txt','a') as f:
+        f.write(f"For {net} {repair_number} {radius} : \\  big:{p2} \\ \n")
 
 def compare_autoattack(net, 
                             radius_bit, repair_number):

@@ -6,6 +6,9 @@
 ```pip install -r requirements.txt```
 ### Preparation
 For the reproduction of the results, you need to substitute some files in the `torchattacks` package with the files in the `AutoAttack_for_AdvRepair` folder.
+
+Specifically, for the CIFAR-10 dataset, due to the common use of `transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))` for normalization during training, which shifts the pixel values out of the [0,1] range, we removed the `torch.clamp(x, 0, 1)` operation in AutoAttack.
+
 ### Dataset and Models
 you can download the dataset and models from [here]([http](https://drive.google.com/drive/folders/16XSk9CfwCnbygDfTACA_2yFmBe7vauCY?usp=drive_link)) and put it in the `data` and `models` folder respectively.
 
@@ -33,6 +36,9 @@ you can run the following command:
 ```
 python cifar10/exp_cifar10_generalization.py
 ```
+#### Reproduct testing the generalization and defense against new adversarial attacks for large property-guided patch modules (PL)
+python cifar10/exp_cifar10_generalization_big.py
+
 ### TINYIMAGENET
 #### Reproduct repairing adversarial attacks on TinyImagenet
 You can run the following command:

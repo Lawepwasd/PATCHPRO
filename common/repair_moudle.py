@@ -179,10 +179,35 @@ class Netsum(nn.Module):
         self.generalization = generalization
     def set_repair_direction_dict(self, repair_direction_dict):
         self.repair_direction_dict = repair_direction_dict
-    def get_bitmap(self, original_out):
+    # def get_bitmap(self, original_out):
+    #     with torch.no_grad():
+    #         # get the max and runner-up score of out
+    #         _,index = torch.topk(original_out,2,dim = -1)
+    #         # max_index = index[...,0]
+    #         # runnerup_index = index[...,1]
+    #         # match with repair_direction_dict : (,2)
+    #         # index_clone = index.clone().unsqueeze_(1).expand(index.shape[0],self.repair_direction_dict.shape[0], index.shape[-1])
+    #         index_clone = index.clone().unsqueeze_(1).expand(index.shape[0], len(self.patch_nets), index.shape[-1])
+
+    #         is_in = torch.eq(index_clone,self.repair_direction_dict).all(dim = -1)
+
+    #         is_in_test_zero = is_in.sum(dim = -1) == 0
+
+    #         is_in_test_zero_index = is_in_test_zero.nonzero(as_tuple=True)[0]
+
+    #         is_in_zero_assign = index[is_in_test_zero_index][...,0].unsqueeze_(1).expand(-1, self.repair_direction_dict.shape[0])
+
+    #         is_in_zero_assign_map = torch.eq(is_in_zero_assign, self.repair_direction_dict[...,0])
+    #         is_in[is_in_test_zero] = is_in_zero_assign_map
+    #         is_in = is_in.to(torch.uint8)
+    #         self.bitmap = is_in 
+    #     return self.bitmap
+    def get_bitmap(self, sample_top2):
         with torch.no_grad():
             # get the max and runner-up score of out
-            _,index = torch.topk(original_out,2,dim = -1)
+            # _,index = torch.topk(original_out,2,dim = -1)
+            index = sample_top2
+            
             # max_index = index[...,0]
             # runnerup_index = index[...,1]
             # match with repair_direction_dict : (,2)
@@ -201,6 +226,42 @@ class Netsum(nn.Module):
             is_in[is_in_test_zero] = is_in_zero_assign_map
             is_in = is_in.to(torch.uint8)
             self.bitmap = is_in 
+
+            # unique = is_in.sum(dim = -1).nonzero()
+            # first_one_index = is_in[unique].argmax(dim = -1)
+            # is_in_unique_one = torch.zeros_like(is_in)
+            # is_in_unique_one[unique, first_one_index] = 1
+            # self.bitmap = is_in_unique_one
+
+        return self.bitmap
+    
+    def get_bitmap_first(self, sample_top1):
+        index = sample_top1
+        in_bitmap = torch.zeros((index.shape[0], len(self.patch_nets)), dtype = torch.uint8, device = index.device)
+        index_clone = index.clone().unsqueeze_(1).expand(index.shape[0], len(self.patch_nets))
+        is_in_1st = (index_clone[:,:] == self.repair_direction_dict[...,0])
+        
+        nonzero_index_1st = is_in_1st.nonzero(as_tuple=False)
+
+        for i in range(nonzero_index_1st.shape[0]):
+            in_bitmap[nonzero_index_1st[i][0], nonzero_index_1st[i][1]] = 1
+        self.bitmap = in_bitmap
+
+        return self.bitmap
+    def get_bitmap_first_out(self, out):
+        with torch.no_grad():
+            # get the max and runner-up score of out
+            _,index = out.topk(1,dim = -1)
+        in_bitmap = torch.zeros((index.shape[0], len(self.patch_nets)), dtype = torch.uint8, device = index.device)
+        index_clone = index.clone().unsqueeze_(1).expand(index.shape[0], len(self.patch_nets))
+        is_in_1st = (index_clone[:,:] == self.repair_direction_dict[...,0])
+        
+        nonzero_index_1st = is_in_1st.nonzero(as_tuple=False)
+
+        for i in range(nonzero_index_1st.shape[0]):
+            in_bitmap[nonzero_index_1st[i][0], nonzero_index_1st[i][1]] = 1
+        self.bitmap = in_bitmap
+
         return self.bitmap
             
 
@@ -229,7 +290,7 @@ class Netsum(nn.Module):
             if self.is_label_repaired:
                 in_bitmap = self.get_bitmap_label(out)
             else:
-                in_bitmap = self.get_bitmap(out)
+                in_bitmap = self.get_bitmap_first_out(out)
 
             
         # classes_score, violate_score = self.support_net(x) # batchsize * repair_num * []
