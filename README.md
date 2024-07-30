@@ -37,7 +37,9 @@ you can run the following command:
 python cifar10/exp_cifar10_generalization.py
 ```
 #### Reproduct testing the generalization and defense against new adversarial attacks for large property-guided patch modules (PL)
+```
 python cifar10/exp_cifar10_generalization_big.py
+```
 
 ### TINYIMAGENET
 #### Reproduct repairing adversarial attacks on TinyImagenet
