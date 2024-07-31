@@ -7,7 +7,7 @@ PatchPro: Patch Synthesis for Property Repair of Deep Neural Networks
 ### Preparation
 For the reproduction of the results, you need to substitute some files in the `torchattacks` package with the files in the `AutoAttack_for_AdvRepair` folder.
 
-Specifically, for the CIFAR-10 dataset, due to the common use of `transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))` for normalization during training, which shifts the pixel values out of the [0,1] range, we removed the `torch.clamp(x, 0, 1)` operation in AutoAttack. So, you should substitute some files in the `torchattacks` package with the files in the `AutoAttack_for_AdvRepair` folder whose
+Specifically, for the CIFAR-10 dataset, due to the common use of `transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))` for normalization during training, which shifts the pixel values out of the [0,1] range, we removed the `torch.clamp(x, 0, 1)` operation in AutoAttack. So, you should substitute some files in the `torchattacks` package with the files in the `AutoAttack_for_PatchPro` folder whose
 suffix is `_cifar10.py`.
 
 ### Dataset and Models
