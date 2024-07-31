@@ -1,5 +1,5 @@
-# ADVREPAIR
- ADVREPAIR: Provable Repair of Adversarial Attack
+# PATCHPRO
+PatchPro: Patch Synthesis for Property Repair of Deep Neural Networks
 
 ## Requirements
 ### Installation
