@@ -275,6 +275,38 @@ class MnistFeatureProp(FeatureProp):
 
         return p
 
+class Mnist_patch_model_small(nn.Module):
+    def __init__(self,dom: AbsDom, name: str):
+        super(Mnist_patch_model_small,self).__init__()
+        self.dom = dom
+        self.name = name
+        # self.extractor = nn.Sequential(
+        #     dom.Conv2d(in_channels=1,out_channels=16,kernel_size=5,stride=1,padding=2),
+        #     dom.ReLU(),
+        #     dom.MaxPool2d(kernel_size=2)
+        # )
+        self.flatten = dom.Flatten()
+        # self.layer2 = nn.Sequential(
+        #     nn.Conv2d(in_channels=16,out_channels=32,kernel_size=5,stride=1,padding=2),
+        #     nn.ReLU(),
+        #     nn.MaxPool2d(kernel_size=2)
+        # )
+        # multiply the input_shape
+
+        self.classifier = nn.Sequential(
+            # dom.Linear(in_features=16*14*14,out_features=10)
+            dom.Linear(in_features=784,out_features=10)
+        )
+        
+    def forward(self,x):
+        # x = self.extractor(x)
+        # x = x.view(16*14*14,-1)
+        # out = self.classifier(x)
+        x = self.flatten(x)
+        # x = self.extractor(x)
+        out = self.classifier(x)
+        return out
+
 class Mnist_patch_model(nn.Module):
     '''
     The model is to repair the mnist data from input rather than feature

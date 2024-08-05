@@ -140,7 +140,6 @@ class CifarPoints(exp.ConcIns):
         if train:
             fname = f'train_norm.pt'  # note that it is using original data
             # fname = f'{suffix}_norm00.pt'
-            # mnist_train_norm00_dir = "/pub/data/chizm/"
             # combine = torch.load(mnist_train_norm00_dir+fname, device)
             combine = torch.load(Path(CIFAR_DATA_DIR, fname), device)
             inputs, labels = combine 

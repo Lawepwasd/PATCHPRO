@@ -21,7 +21,7 @@ from common.prop import AndProp
 from common.bisecter import Bisecter
 from common import exp, utils
 from common.repair_moudle import Netsum, get_bitmap
-from mnist.mnist_utils import MnistNet_CNN_small, MnistNet_FNN_big, MnistNet_FNN_small, MnistProp, Mnist_patch_model
+from mnist.mnist_utils import MnistNet_CNN_small, MnistNet_FNN_big, MnistNet_FNN_small, MnistProp, Mnist_patch_model, Mnist_patch_model_small
 # from mnist.u import MnistNet, MnistFeatureProp
 
 device = torch.device(f'cuda:2')
@@ -30,14 +30,14 @@ MNIST_NET_DIR = Path(__file__).resolve().parent.parent / 'model' /'mnist'
 # MNIST_NET_DIR = Path(__file__).resolve().parent.parent / 'pgd' /'model' 
 
 
-RES_DIR = Path(__file__).resolve().parent.parent / 'results' / 'mnist' / 'repair' / 'base'
+RES_DIR = Path(__file__).resolve().parent.parent / 'results' / 'mnist' / 'small' 
 RES_DIR.mkdir(parents=True, exist_ok=True)
 
 
-RES_DIR_LABEL = Path(__file__).resolve().parent.parent / 'results' / 'mnist' / 'repair' / 'label'
-RES_DIR_LABEL.mkdir(parents=True, exist_ok=True)
+# RES_DIR_LABEL = Path(__file__).resolve().parent.parent / 'results' / 'mnist' / 'repair' / 'label'
+# RES_DIR_LABEL.mkdir(parents=True, exist_ok=True)
 # REPAIR_MODEL_DIR = Path(__file__).resolve().parent.parent / 'model' / 'patch_format'
-REPAIR_MODEL_DIR = Path(__file__).resolve().parent.parent / 'model' / 'mnist_base_format'
+REPAIR_MODEL_DIR = Path(__file__).resolve().parent.parent / 'model' / 'mnist_patch_format_small'
 REPAIR_MODEL_DIR.mkdir(parents=True, exist_ok=True)
 LABEL_MODEL_DIR = Path(__file__).resolve().parent.parent / 'model' / 'mnist_label_format' 
 LABEL_MODEL_DIR.mkdir(parents=True, exist_ok=True)
@@ -128,7 +128,7 @@ class MnistPoints(exp.ConcIns):
         if train:
             fname = f'train_norm00.pt'  # note that it is using original data
             # fname = f'{suffix}_norm00.pt'
-            # mnist_train_norm00_dir = "/pub/data/chizm/"
+            # mnist_train_norm00_dir = "/pub/data/xxxx/"
             # combine = torch.load(mnist_train_norm00_dir+fname, device)
             combine = torch.load(Path(MNIST_DATA_DIR, fname), device)
             inputs, labels = combine 
@@ -281,7 +281,11 @@ def repair_mnist(args: Namespace)-> Tuple[int, float, bool, float]:
     else:
         n_repair = args.repair_number
     for i in range(n_repair):
-        patch_net = Mnist_patch_model(dom=args.dom,
+        if args.net == 'CNN_small':
+            patch_net = Mnist_patch_model(dom=args.dom,
+            name = f'{args.patch_size} patch network {i}').to(device)
+        else:
+            patch_net = Mnist_patch_model_small(dom=args.dom,
             name = f'{args.patch_size} patch network {i}').to(device)
         patch_lists.append(patch_net)
     logging.info(f'--{args.patch_size} patch network: {patch_net}')
@@ -600,10 +604,10 @@ def test(lr:float = 0.005, net:str = 'CNN_small',repair_radius:float = 0.1, repa
 
         
     }
-    if label_repaired:
-        parser = MnistArgParser(RES_DIR_LABEL, description='MNIST Correct by Construction, label repaired')
-    else:
-        parser = MnistArgParser(RES_DIR, description='MNIST Correct by Construction')
+    # if label_repaired:
+    #     parser = MnistArgParser(RES_DIR_LABEL, description='MNIST Correct by Construction, label repaired')
+    # else:
+    parser = MnistArgParser(RES_DIR, description='MNIST Correct by Construction')
     parser.set_defaults(**test_defaults)
     args, _ = parser.parse_known_args()
 
@@ -634,18 +638,18 @@ if __name__ == '__main__':
     for net in ['FNN_small', 'FNN_big', 'CNN_small']:
     # for net in ['CNN_small']:
     # for net in ['FNN_small']:
+        for patch_size in ['small']: 
         # for patch_size in ['small', 'big']:
-        for patch_size in ['big']:
         # for patch_size in ['big']:
-            for radius in [0.3]:
+        # for patch_size in ['big']:
+            # for radius in [0.3]:
             # for radius in [0.05]:
-            # for radius in [0.05,0.1,0.3]: #,0.1,0.3
+            for radius in [0.05,0.1,0.3]: #,0.1,0.3
                 # if net == 'FNN_small' and radius == 0.05:
                 #     continue
                 # for repair_number,test_number in zip([100],[1000]):
-                # for label_repaired in [True,False]:
-                for repair_number,test_number in zip([50],[500]):
-                # for repair_number,test_number in zip([50,100,200,500,1000],[500,1000,2000,5000,10000]):
+                # for repair_number,test_number in zip([50],[500]):
+                for repair_number,test_number in zip([50,100,200,500,1000],[500,1000,2000,5000,10000]):
                 # for repair_number,test_number in zip([1000],[10000]):
                 # for repair_number,test_number in zip([200],[2000]):
                     test(lr=10, net=net, repair_radius=radius, repair_number = repair_number, refine_top_k= 50, 

@@ -132,7 +132,7 @@ class TinyImagenetPoints(exp.ConcIns):
         if train:
             fname = f'train.pt'  # note that it is using original data
             # fname = f'{suffix}_norm00.pt'
-            # TinyImagenet_train_norm00_dir = "/pub/data/chizm/"
+            # TinyImagenet_train_norm00_dir = "/pub/data/xxxx/"
             # combine = torch.load(TinyImagenet_train_norm00_dir+fname, device)
             combine = torch.load(Path(TINY_IMAGENET_DATA_DIR, fname), device)
             inputs, labels = combine 

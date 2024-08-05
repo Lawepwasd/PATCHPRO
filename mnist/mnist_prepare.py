@@ -850,7 +850,7 @@ def compare_pgd_step_length(net, patch_format,
     #                 return False
     #     return True
 
-def compare_autoattack(net, patch_format, 
+def compare_autoattack_small(net, patch_format, 
                             radius, repair_number):
     '''
     use the length of pgd steps to compare the hardness of attacking two model respectively
@@ -859,7 +859,7 @@ def compare_autoattack(net, patch_format,
     # load net
     from common.repair_moudle import Netsum
     from DiffAbs.DiffAbs import deeppoly
-    from mnist.mnist_utils import MnistNet_CNN_small,MnistNet_FNN_small, MnistNet_FNN_big, Mnist_patch_model,MnistProp
+    from mnist.mnist_utils import MnistNet_CNN_small,MnistNet_FNN_small, MnistNet_FNN_big, Mnist_patch_model_small,MnistProp, Mnist_patch_model
     device = 'cuda:3' if torch.cuda.is_available() else 'cpu'
     print(f'Using {device} device')
     if net == 'CNN_small':
@@ -880,16 +880,18 @@ def compare_autoattack(net, patch_format,
     orinet.to(device)
     patch_lists = []
     for i in range(repair_number):
-        if patch_format == 'small':
+        if net == 'CNN_small':
             patch_net = Mnist_patch_model(dom=deeppoly, name = f'small patch network {i}')
-        elif patch_format == 'big':
-            patch_net = Mnist_patch_model(dom=deeppoly,name = f'big patch network {i}')
+        else:
+            patch_net = Mnist_patch_model_small(dom=deeppoly, name = f'small patch network {i}')
+        # elif patch_format == 'big':
+        #     patch_net = Mnist_patch_model(dom=deeppoly,name = f'big patch network {i}')
         patch_net.to(device)
         patch_lists.append(patch_net)
     model2 =  Netsum(deeppoly, target_net = orinet, patch_nets= patch_lists, device=device)
-    model2.load_state_dict(torch.load(f"./model/patch_format/Mnist-{net}-repair_number{repair_number}-rapair_radius{radius}-{patch_format}.pt",map_location=device))
+    model2.load_state_dict(torch.load(f"./model/mnist_patch_format_small/Mnist-{net}-repair_number{repair_number}-rapair_radius{radius}-{patch_format}.pt",map_location=device))
 
-    model3 = adv_training(net,radius, data_num=repair_number, device=device)
+    # model3 = adv_training(net,radius, data_num=repair_number, device=device)
 
 
     # load data
@@ -898,7 +900,7 @@ def compare_autoattack(net, patch_format,
     
     datas = datas[:repair_number]
     labels = labels[:repair_number]
-
+    data_loader = DataLoader(torch.utils.data.TensorDataset(datas,labels), batch_size=50)
     # pgd
     # pgd1 = PGD(model=model1, eps=radius, alpha=2/255, steps=50, random_start=True)
     # pgd2 = PGD(model=model2, eps=radius, alpha=2/255, steps=50, random_start=True)
@@ -913,7 +915,7 @@ def compare_autoattack(net, patch_format,
 
     # get bitmap
     from common.prop import AndProp
-    from common.bisecter import Bisecter
+    # from art.bisecter import Bisecter
     repairlist = [(data[0],data[1]) for data in zip(datas, labels)]
     repair_prop_list = MnistProp.all_props(deeppoly, DataList=repairlist, input_shape= datas.shape[1:], radius= radius)
     # get the all props after join all l_0 ball feature property
@@ -923,38 +925,26 @@ def compare_autoattack(net, patch_format,
     in_lb, in_ub = all_props.lbub(device)
     in_bitmap = all_props.bitmap(device)
 
-    bitmap = get_bitmap(in_lb, in_ub, in_bitmap, datas, device)
+    # bitmap = get_bitmap(in_lb, in_ub, in_bitmap, datas, device)
 
-    p1 = 0
+    # p1 = 0
     p2 = 0
-    p3 = 0
+    # p3 = 0
 
-    for ith, (image, label) in enumerate(zip(datas,labels)):
-        image = image.unsqueeze(0).to(device)
-        label = label.unsqueeze(0).to(device)
+    for images,labels in data_loader:
+        images = images.to(device)
+        labels = labels.to(device)
 
-        at1 = AutoAttack(model1, norm='Linf', eps=radius, version='standard', verbose=True)
-        adv_images1 = at1(image, label)
-        if model1(adv_images1).argmax(dim=1)!= label:
-            print("success1")
-            p1 += 1
-        else:
-            print("fail")
-        at2 = AutoAttack(model2, norm='Linf', eps=radius, version='standard', verbose=True, bitmap=bitmap)
-        adv_images2 = at2(image, label)
-        if model2(adv_images2, bitmap[ith]).argmax(dim=1) != label:
-            print("success2")
-            p2 += 1
-        else:
-            print("fail")
-        at3 = AutoAttack(model3, norm='Linf', eps=radius, version='standard', verbose=True)
-        adv_images3 = at3(image, label)
-        if model3(adv_images3).argmax(dim=1) != label:
-            print("success3")
-            p3 += 1
-        else:
-            print("fail")
-        
+        bitmap_batch = get_bitmap(in_lb, in_ub, in_bitmap, images, device)
+        model2.bitmap = bitmap_batch
+        at2 = AutoAttack(model2, norm='Linf', eps=radius, version='standard', verbose=False, 
+                         bitmap=bitmap_batch)
+        adv_images2 = at2(images, labels)
+        outs2 = model2(adv_images2, bitmap_batch)
+        predicted2 = torch.argmax(outs2, dim=1)
+        correct2 = torch.sum(predicted2 == labels).item()
+        p2 += correct2
+        print(f"small patch attack success {correct2}")      
         # step1, ori_acc = pgd1.forward_sumsteps(image,label)
         # step2, repair_acc = pgd2.forward_sumsteps(image,label, device=device, bitmap = [in_lb, in_ub, in_bitmap])
         # step3, adt_acc = pgd3.forward_sumsteps(image,label)
@@ -971,7 +961,7 @@ def compare_autoattack(net, patch_format,
     
     # print(f"ori_step {ori_step}, repair_step {repair_step}, pgd_step {pgd_step} \\ ori:{p1}, patch:{p2}, adv-train:{p3}")
     with open(f'./results/mnist/repair/autoattack/compare_autoattack_ac.txt','a') as f:
-        f.write(f"For {net} {radius} {data} {patch_format}: \\  ori:{p1}, patch:{p2}, adv-train:{p3} \\ \n")
+        f.write(f"For {net} {radius} {data} {patch_format}: \\  small:{p2} \\ \n")
 
 from TRADES.trades import trades_loss
 def adv_training_test(net, radius,data_num, device, epoch_n=200):
