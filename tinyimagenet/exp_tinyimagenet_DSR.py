@@ -624,8 +624,8 @@ def test(lr:float = 0.005, net:str = 'CNN_small',repair_radius:float = 0.1, repa
 if __name__ == '__main__':
 
     # for net in ['wide_resnet101_2']:
-    # for net in ['resnet152','wide_resnet101_2']:
-    for net in ['resnet152']:
+    for net in ['resnet152','wide_resnet101_2']:
+    # for net in ['resnet152']:
         # for patch_size in ['small', 'big']:
         # for patch_size in ['big']:
         # for radius in [4]: 
@@ -637,8 +637,8 @@ if __name__ == '__main__':
                 # for repair_number,test_number in zip([50],[500]):
                 # for repair_number,test_number in zip([500],[5000]):
 
-                for repair_number,test_number in zip([500,1000],[5000,10000]):
-                # for repair_number,test_number in zip([50,100,200,500,1000],[500,1000,2000,5000,10000]):
+                # for repair_number,test_number in zip([500,1000],[5000,10000]):
+                for repair_number,test_number in zip([50,100,200,500,1000],[500,1000,2000,5000,10000]):
                     test(net=net, repair_radius=radius, repair_number = repair_number, 
          train_datasize = 10000, test_datasize = 10000, 
          accuracy_loss='CE')

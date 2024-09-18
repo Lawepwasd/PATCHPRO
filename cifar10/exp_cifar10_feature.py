@@ -989,18 +989,18 @@ if __name__ == '__main__':
 
 
    # for net in ['FNN_small', 'FNN_big', 'CNN_small']:
-    # for net in ['vgg19', 'resnet18']:
-    for net in ['resnet18']:
+    for net in ['vgg19', 'resnet18']:
+    # for net in ['resnet18']:
     # for net in ['vgg19']:
         # for patch_size in ['small', 'big']:
         # for patch_size in ['big']:
-            for radius in [4]: 
+            for radius in [4,8]: 
                 for label_repaired in [False, True]:
             # for radius in [0.05,0.1,0.3]: #,0.1,0.3
                 # for repair_number,test_number in zip([200],[2000]):
-                    for repair_number,test_number in zip([50],[500]):
+                    # for repair_number,test_number in zip([50],[500]):
                 # for repair_number,test_number in zip([1000],[10000]):
-                    # for repair_number,test_number in zip([50,100,200,500,1000],[500,1000,2000,5000,10000]):
+                    for repair_number,test_number in zip([50,100,200,500,1000],[500,1000,2000,5000,10000]):
                         # if radius == 4 and (repair_number == 50 or repair_number == 100 or repair_number == 200):
                         #     continue
                         test(lr=10, net=net, repair_radius=radius, repair_number = repair_number, refine_top_k= 50, 
