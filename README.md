@@ -41,6 +41,10 @@ python cifar10/exp_cifar10_generalization.py
 ```
 python cifar10/exp_cifar10_generalization_big.py
 ```
+#### Reproduct repairing adversarial attacks on Cifar10 with single patch
+```
+python cifar10/exp_cifar10_feature_single_patch.py
+```
 
 ### TINYIMAGENET
 #### Reproduct repairing adversarial attacks on TinyImagenet
