@@ -18,19 +18,19 @@ from art.prop import AndProp
 from art.bisecter import Bisecter
 from art import exp, utils
 from art.repair_moudle import Netsum
-from cifar10_utils import CifarProp, Cifar_feature_patch_model, Resnet_model, Vgg_model
+from cifar10_utils import CifarProp, Cifar_feature_patch_model_big, Resnet_model, Vgg_model
 # from mnist.mnist_utils import MnistNet_CNN_small, MnistNet_FNN_big, MnistNet_FNN_small, MnistProp, Mnist_feature_patch_model
 # from mnist.u import MnistNet, MnistFeatureProp
 torch.manual_seed(10668091966382305352)
-device = torch.device(f'cuda:2')
+device = torch.device(f'cuda:1')
 
 
 
 CIFAR_DATA_DIR = Path(__file__).resolve().parent.parent / 'data' / 'cifar10'
 CIFAR_NET_DIR = Path(__file__).resolve().parent.parent / 'model' / 'cifar10'
-RES_DIR = Path(__file__).resolve().parent.parent / 'results' / 'cifar10' / 'single'
+RES_DIR = Path(__file__).resolve().parent.parent / 'results' / 'cifar10' / 'single' / 'big'
 RES_DIR.mkdir(parents=True, exist_ok=True)
-REPAIR_MODEL_DIR = Path(__file__).resolve().parent.parent / 'model' / 'cifar10_single_format'
+REPAIR_MODEL_DIR = Path(__file__).resolve().parent.parent / 'model' / 'cifar10_single_format' / 'big'
 REPAIR_MODEL_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -647,7 +647,7 @@ def repair_cifar(args: Namespace, weight_clamp = False)-> Tuple[int, float, bool
     patch_lists = []
     n_repair = all_props.labels.shape[1]
     for i in range(1):
-        patch_net = Cifar_feature_patch_model(dom=args.dom,
+        patch_net = Cifar_feature_patch_model_big(dom=args.dom,
             name = f'feature patch network {i}',input_dimension=feature_shape[0])
         patch_net.to(device)
         patch_lists.append(patch_net)
@@ -1039,18 +1039,18 @@ if __name__ == '__main__':
    # for net in ['FNN_small', 'FNN_big', 'CNN_small']:
     # for net in ['vgg19', 'resnet18']:
     # for net in ['resnet18']:
-    for net in ['vgg19']:
+    for net in ['resnet18']:
         # for patch_size in ['small', 'big']:
         # for patch_size in ['big']:
-            for radius in [4,8]: 
+            # for radius in [8]: 
 
-            # for radius in [4,8]: 
+            for radius in [4,8]: 
 
             # for radius in [0.05,0.1,0.3]: #,0.1,0.3
                 # for repair_number,test_number in zip([200],[2000]):
-                for repair_number,test_number in zip([50,100,200,500,1000],[500,1000,2000,5000,10000]):
-                # for repair_number,test_number in zip([500,1000],[5000,10000]):
                 # for repair_number,test_number in zip([50,100,200,500,1000],[500,1000,2000,5000,10000]):
+                for repair_number,test_number in zip([50,100],[500,1000]):
+                # for repair_number,test_number in zip([200,500,1000],[2000,5000,10000]):
                     # if radius == 4 and (repair_number == 50 or repair_number == 100 or repair_number == 200):
                     #     continue
                     test(lr=10, net=net, repair_radius=radius, repair_number = repair_number, refine_top_k= 50, 

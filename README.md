@@ -46,6 +46,12 @@ python cifar10/exp_cifar10_generalization_big.py
 python cifar10/exp_cifar10_feature_single_patch.py
 ```
 
+After repairing with signle patch, you can evaluate DGSR with code
+```
+python cifar10/exp_cifar10_generalization_single_patch.py
+```
+
+
 ### TINYIMAGENET
 #### Reproduct repairing adversarial attacks on TinyImagenet
 You can run the following command:
